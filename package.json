@@ -3,6 +3,14 @@
   "version": "0.0.1",
   "module": "src/index.ts",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dylan-gluck/simple-graph-bun.git"
+  },
+  "homepage": "https://github.com/dylan-gluck/simple-graph-bun#readme",
+  "bugs": {
+    "url": "https://github.com/dylan-gluck/simple-graph-bun/issues"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
