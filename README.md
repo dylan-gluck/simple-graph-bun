@@ -82,13 +82,6 @@ const searchQuery = buildSearchQuery({
 })
 ```
 
-## Quickstart:
-
-```bash
-bun install
-bun run src/index.ts
-```
-
 ## Architecture
 
 - **Factory Pattern**: `createGraph(database)` returns configured instance
@@ -101,13 +94,3 @@ bun run src/index.ts
 * Inspired by [simple-graph](https://github.com/dpapathanasiou/simple-graph)
 * Python [SDK](https://github.com/dpapathanasiou/simple-graph-pypi)
 * Go [SDK](https://github.com/dpapathanasiou/simple-graph-go)
-
-## Template System Benefits
-
-| Feature | External Templates | TypeScript Templates |
-|---------|-------------------|---------------------|
-| Dependencies | Jinja2/Handlebars | Zero |
-| Type Safety | Runtime | Compile-time |
-| Performance | Parse overhead | Native strings |
-| IDE Support | Limited | Full autocomplete |
-| Debugging | Template syntax | Standard TypeScript |

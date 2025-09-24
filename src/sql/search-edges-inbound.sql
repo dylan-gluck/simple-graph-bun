@@ -1,1 +1,1 @@
-SELECT * FROM edges WHERE source = ?
+SELECT * FROM edges WHERE target = ?
