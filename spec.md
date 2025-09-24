@@ -386,12 +386,97 @@ try {
 }
 ```
 
+## Database Integration
+
+### Bun SQLite Implementation
+
+SimpleGraph uses `bun:sqlite` for optimal performance in the Bun runtime:
+
+```typescript
+import { Database } from "bun:sqlite"
+
+// Create database instance
+const db = new Database(database || ":memory:")
+
+// Enable WAL mode for better concurrency
+db.exec("PRAGMA journal_mode = WAL")
+
+// Enable foreign keys for referential integrity
+db.exec("PRAGMA foreign_keys = ON")
+```
+
+### Schema Initialization
+
+The database schema is automatically created during graph instantiation:
+
+```sql
+CREATE TABLE IF NOT EXISTS nodes (
+  identifier TEXT PRIMARY KEY,
+  body TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_nodes_body ON nodes(body);
+
+CREATE TABLE IF NOT EXISTS edges (
+  source TEXT NOT NULL,
+  target TEXT NOT NULL,
+  properties TEXT,
+  FOREIGN KEY (source) REFERENCES nodes(identifier) ON DELETE CASCADE,
+  FOREIGN KEY (target) REFERENCES nodes(identifier) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_edges_source ON edges(source);
+CREATE INDEX IF NOT EXISTS idx_edges_target ON edges(target);
+```
+
+### Transaction Management
+
+All operations use prepared statements with automatic transaction handling:
+
+```typescript
+// Example prepared statement pattern
+const insertNode = db.prepare("INSERT INTO nodes (identifier, body) VALUES (?, ?)")
+const updateNode = db.prepare("UPDATE nodes SET body = ? WHERE identifier = ?")
+
+// Transaction wrapper for bulk operations
+const bulkInsert = db.transaction((nodes: NodeData[]) => {
+  for (const node of nodes) {
+    insertNode.run(node.identifier, JSON.stringify(node.body))
+  }
+})
+```
+
+### JSON Storage and Validation
+
+Node and edge data stored as JSON with automatic validation:
+
+```typescript
+// JSON serialization with validation
+function storeNodeData(data: object): string {
+  try {
+    return JSON.stringify(data)
+  } catch (error) {
+    throw new ValidationError("Invalid JSON data")
+  }
+}
+
+// JSON deserialization with error handling
+function retrieveNodeData(json: string): object {
+  try {
+    return JSON.parse(json)
+  } catch (error) {
+    throw new DatabaseError("Corrupted node data")
+  }
+}
+```
+
 ## Configuration
 
 ### Database Options
 
+- **WAL Mode**: Write-Ahead Logging enabled for better concurrent access
 - **Foreign Keys**: Automatically enabled for referential integrity
-- **JSON Validation**: Automatic JSON syntax validation
+- **JSON Validation**: Automatic JSON syntax validation and error handling
 - **Transaction Mode**: Each operation wrapped in atomic transaction
 - **Template System**: Zero-dependency TypeScript template functions for SQL generation
 
@@ -399,9 +484,9 @@ try {
 
 - **Instance Reuse**: Create graph instances once and reuse for multiple operations
 - **Connection Management**: Automatic connection lifecycle management per instance
-- **Prepared Statements**: Reused within bulk operations
-- **Indexes**: Automatic indexing on ID, source, and target columns
-- **Bulk Operations**: Use provided bulk methods for better performance
+- **Prepared Statements**: Cached and reused for optimal query performance
+- **Indexes**: Automatic indexing on ID, source, target, and body columns
+- **Bulk Operations**: Use provided bulk methods with transaction wrappers
 - **Multiple Databases**: Create separate instances for different databases
 - **Template Performance**: No runtime template parsing overhead, compile-time type checking
 
