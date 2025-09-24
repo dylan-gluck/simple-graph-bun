@@ -207,9 +207,11 @@ Gets outbound edges only.
 
 ## Search Operations
 
+Search operations use TypeScript template functions to generate dynamic SQL queries, replacing external template systems with type-safe query builders.
+
 ### findNodes(query: SearchQuery): object[]
 
-Search nodes using flexible query conditions.
+Search nodes using flexible query conditions built with internal template functions.
 
 **Parameters:**
 - `query`: Search configuration object
@@ -220,15 +222,16 @@ interface SearchQuery {
   resultColumn?: 'id' | 'body'
   key?: string
   tree?: boolean
-  searchClauses?: WhereClause[]
+  searchClauses?: string[]
 }
 
 interface WhereClause {
   idLookup?: boolean
   keyValue?: boolean
   tree?: boolean
-  predicate?: string // '=', '>', '<', 'LIKE'
-  joiner?: string // 'AND', 'OR', 'NOT'
+  predicate?: '=' | 'LIKE' | '>' | '<'
+  andOr?: 'AND' | 'OR' | 'NOT'
+  key?: string
 }
 ```
 
@@ -236,23 +239,24 @@ interface WhereClause {
 ```typescript
 const graph = createGraph('graph.db')
 
-// Find users by name
+// Find users by name using template system
 const users = graph.findNodes({
   key: 'name',
-  searchClauses: [{
-    keyValue: true,
-    predicate: '='
-  }]
+  searchClauses: [
+    buildWhereClause({ keyValue: true, key: 'name', predicate: '=' })
+  ]
 })
 ```
 
 **Returns:** Array of matching nodes
 
+**Internal Implementation:** Uses `buildSearchQuery()` and `buildWhereClause()` template functions for type-safe SQL generation.
+
 ## Traversal Operations
 
 ### traverse(sourceId: string | number, config: TraversalConfig): GraphData[]
 
-Performs graph traversal starting from a node.
+Performs graph traversal starting from a node using recursive CTE templates.
 
 **Parameters:**
 - `sourceId`: Starting node ID
@@ -285,6 +289,8 @@ const connected = graph.traverse('user-1', {
   maxDepth: 2
 })
 ```
+
+**Internal Implementation:** Uses `buildTraversalQuery()` template function to generate recursive CTE SQL with conditional branches for inbound/outbound traversal.
 
 ## Bulk Operations
 
@@ -387,6 +393,7 @@ try {
 - **Foreign Keys**: Automatically enabled for referential integrity
 - **JSON Validation**: Automatic JSON syntax validation
 - **Transaction Mode**: Each operation wrapped in atomic transaction
+- **Template System**: Zero-dependency TypeScript template functions for SQL generation
 
 ### Performance Considerations
 
@@ -396,6 +403,7 @@ try {
 - **Indexes**: Automatic indexing on ID, source, and target columns
 - **Bulk Operations**: Use provided bulk methods for better performance
 - **Multiple Databases**: Create separate instances for different databases
+- **Template Performance**: No runtime template parsing overhead, compile-time type checking
 
 ## Usage Patterns
 

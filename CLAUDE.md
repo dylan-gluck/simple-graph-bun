@@ -28,6 +28,7 @@ A SQLite graph database for the bun runtime.
 ## Reference Docs
 * `.reference/simple-graph/README.md` - simple-graph sql reference
 * `.reference/docs/bun-sqlite.md` - bun sqlite reference
+* `.reference/docs/bun-tests.md` - bun sqlite reference
 
 # Examples
 * `.reference/simple-graph-go/simplegraph/database.go` - simple-graph go sdk
