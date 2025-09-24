@@ -4,15 +4,6 @@ A SQLite graph database for the bun runtime.
 
 ---
 
-## Constitution
-* Simple maintainable code, do not over abstract
-* Do not add additional dependencies
-
-## Tech Stack
-* Bun
-* SQLite
-
-## Bun
 - Always use Bun, do not use Node.js APIs or npm package manager
 - Bun automatically loads .env, so don't use dotenv.
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
